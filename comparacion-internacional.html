@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acceso a combustibles limpios: comparativo internacional</title>
+<style>
+:root{--azul:#0C4184;--texto:#1F2937;--rojo:#EC0000;--gris:#8B8B8B;--bar:#1B3A5C}
+*{box-sizing:border-box}
+html,body{margin:0;background:#fff;color:var(--texto);font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:12px 14px 20px}
+.banner{background:var(--azul);color:#fff;border-radius:10px;padding:12px 14px;text-align:center;font-weight:700;font-size:clamp(15px,4.2vw,20px);line-height:1.25}
+.sub{text-align:center;font-size:clamp(12px,3.3vw,14px);margin:8px 0 4px}
+.year{font-size:clamp(44px,14vw,76px);font-weight:800;color:var(--azul);text-align:right;line-height:1;margin:4px 4px 0;opacity:.9}
+#chart{position:relative;margin-top:2px}
+.row{position:absolute;left:0;right:0;height:var(--rh);display:flex;align-items:center;transition:transform .5s ease}
+.lab{width:var(--lw);padding-right:8px;text-align:right;font-size:clamp(11.5px,3.3vw,14px);line-height:1.15;font-weight:600}
+.track{flex:1;position:relative;height:70%}
+.bar{height:100%;border-radius:0 4px 4px 0;transition:width .5s ease;background:var(--bar);position:relative}
+.val{position:absolute;left:calc(100% + 5px);top:50%;transform:translateY(-50%);font-size:clamp(11.5px,3.3vw,14px);font-weight:700;white-space:nowrap}
+.mx .bar{background:var(--rojo)} .mx .lab,.mx .val{color:var(--rojo);font-weight:800}
+.ag .bar{background:var(--gris)}
+.ctl{display:flex;align-items:center;gap:10px;margin-top:10px}
+button{border:0;background:var(--azul);color:#fff;border-radius:8px;font-size:15px;font-weight:700;padding:10px 14px;min-width:96px;cursor:pointer;touch-action:manipulation}
+input[type=range]{flex:1;accent-color:var(--azul);height:34px}
+.ticks{display:flex;justify-content:space-between;font-size:11px;color:#556070;margin:0 2px 0 106px}
+.src{font-size:11.5px;color:#556070;margin-top:10px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner">Población con acceso a combustibles limpios para cocinar (%)</div>
+  <div class="sub">Comparativo internacional, 2000&ndash;2024</div>
+  <div class="year" id="year">2000</div>
+  <div id="chart" role="img" aria-label="Gráfica animada de barras: porcentaje de población con acceso a combustibles limpios para cocinar, por país, de 2000 a 2024"></div>
+  <div class="ctl">
+    <button id="play" type="button">&#9208; Pausa</button>
+    <input id="slider" type="range" min="2000" max="2024" step="1" value="2000" aria-label="Año">
+  </div>
+  <div class="src">Fuente: WHO/GHO v&iacute;a Our World in Data (Stoner et al., 2020)</div>
+</div>
+<script>
+const DATA={"2000": {"Honduras": 30, "Guatemala": 40, "Mundo": 47, "Colombia": 79, "América Latina y el Caribe (promedio)": 80, "México": 84, "Chile": 87, "Europa": 88, "Brasil": 89, "Costa Rica": 89, "Argentina": 97}, "2001": {"Honduras": 32, "Guatemala": 40, "Mundo": 48, "Colombia": 80, "América Latina y el Caribe (promedio)": 81, "México": 85, "Chile": 87, "Europa": 89, "Brasil": 90, "Costa Rica": 90, "Argentina": 97}, "2002": {"Honduras": 33, "Guatemala": 40, "Mundo": 49, "Colombia": 81, "América Latina y el Caribe (promedio)": 82, "México": 85, "Chile": 88, "Europa": 90, "Brasil": 90, "Costa Rica": 90, "Argentina": 97}, "2003": {"Honduras": 34, "Guatemala": 40, "Mundo": 50, "Colombia": 81, "América Latina y el Caribe (promedio)": 82, "México": 86, "Chile": 88, "Europa": 90, "Costa Rica": 90, "Brasil": 91, "Argentina": 98}, "2004": {"Honduras": 36, "Guatemala": 39, "Mundo": 51, "Colombia": 82, "América Latina y el Caribe (promedio)": 82, "México": 86, "Chile": 88, "Europa": 91, "Brasil": 91, "Costa Rica": 91, "Argentina": 98}, "2005": {"Honduras": 37, "Guatemala": 39, "Mundo": 52, "Colombia": 82, "América Latina y el Caribe (promedio)": 83, "México": 86, "Chile": 88, "Costa Rica": 91, "Brasil": 91, "Europa": 92, "Argentina": 98}, "2006": {"Guatemala": 38, "Honduras": 38, "Mundo": 52, "Colombia": 83, "América Latina y el Caribe (promedio)": 83, "México": 86, "Chile": 89, "Costa Rica": 91, "Brasil": 92, "Europa": 92, "Argentina": 99}, "2007": {"Guatemala": 38, "Honduras": 39, "Mundo": 53, "Colombia": 83, "América Latina y el Caribe (promedio)": 84, "México": 85, "Chile": 89, "Costa Rica": 91, "Brasil": 92, "Europa": 93, "Argentina": 99}, "2008": {"Guatemala": 37, "Honduras": 40, "Mundo": 54, "Colombia": 84, "América Latina y el Caribe (promedio)": 84, "México": 85, "Chile": 89, "Costa Rica": 92, "Brasil": 93, "Europa": 93, "Argentina": 99}, "2009": {"Guatemala": 37, "Honduras": 40, "Mundo": 55, "Colombia": 84, "América Latina y el Caribe (promedio)": 84, "México": 85, "Chile": 90, "Costa Rica": 92, "Brasil": 93, "Europa": 93, "Argentina": 99}, "2010": {"Guatemala": 37, "Honduras": 41, "Mundo": 56, "México": 84, "Colombia": 85, "América Latina y el Caribe (promedio)": 85, "Chile": 90, "Costa Rica": 92, "Europa": 93, "Brasil": 94, "Argentina": 99}, "2011": {"Guatemala": 38, "Honduras": 42, "Mundo": 58, "México": 84, "Colombia": 85, "América Latina y el Caribe (promedio)": 85, "Chile": 91, "Costa Rica": 93, "Brasil": 94, "Europa": 94, "Argentina": 99}, "2012": {"Guatemala": 38, "Honduras": 43, "Mundo": 59, "México": 84, "América Latina y el Caribe (promedio)": 85, "Colombia": 86, "Chile": 91, "Costa Rica": 93, "Europa": 94, "Brasil": 95, "Argentina": 100}, "2013": {"Guatemala": 38, "Honduras": 44, "Mundo": 60, "México": 84, "América Latina y el Caribe (promedio)": 86, "Colombia": 87, "Chile": 92, "Costa Rica": 93, "Europa": 94, "Brasil": 95, "Argentina": 100}, "2014": {"Guatemala": 39, "Honduras": 45, "Mundo": 62, "México": 84, "América Latina y el Caribe (promedio)": 86, "Colombia": 88, "Chile": 92, "Costa Rica": 94, "Brasil": 95, "Europa": 95, "Argentina": 100}, "2015": {"Guatemala": 40, "Honduras": 46, "Mundo": 64, "México": 84, "América Latina y el Caribe (promedio)": 87, "Colombia": 88, "Chile": 93, "Costa Rica": 94, "Brasil": 95, "Europa": 95, "Argentina": 100}, "2016": {"Guatemala": 40, "Honduras": 47, "Mundo": 65, "México": 84, "América Latina y el Caribe (promedio)": 87, "Colombia": 89, "Chile": 93, "Europa": 95, "Costa Rica": 95, "Brasil": 96, "Argentina": 100}, "2017": {"Guatemala": 42, "Honduras": 48, "Mundo": 67, "México": 85, "América Latina y el Caribe (promedio)": 87, "Colombia": 90, "Chile": 93, "Costa Rica": 95, "Brasil": 96, "Europa": 96, "Argentina": 100}, "2018": {"Guatemala": 42, "Honduras": 49, "Mundo": 68, "México": 85, "América Latina y el Caribe (promedio)": 88, "Colombia": 90, "Chile": 94, "Costa Rica": 95, "Brasil": 96, "Europa": 96, "Argentina": 100}, "2019": {"Guatemala": 44, "Honduras": 50, "Mundo": 70, "México": 85, "América Latina y el Caribe (promedio)": 88, "Colombia": 91, "Chile": 94, "Europa": 96, "Brasil": 96, "Costa Rica": 96, "Argentina": 100}, "2020": {"Guatemala": 45, "Honduras": 52, "Mundo": 71, "México": 86, "América Latina y el Caribe (promedio)": 88, "Colombia": 91, "Chile": 94, "Europa": 96, "Costa Rica": 96, "Brasil": 97, "Argentina": 100}, "2021": {"Guatemala": 46, "Honduras": 53, "Mundo": 72, "México": 86, "América Latina y el Caribe (promedio)": 89, "Colombia": 92, "Chile": 95, "Europa": 96, "Costa Rica": 96, "Brasil": 97, "Argentina": 100}, "2022": {"Guatemala": 48, "Honduras": 55, "Mundo": 73, "México": 87, "América Latina y el Caribe (promedio)": 89, "Colombia": 92, "Chile": 95, "Europa": 96, "Brasil": 97, "Costa Rica": 97, "Argentina": 100}, "2023": {"Guatemala": 49, "Honduras": 55, "Mundo": 74, "México": 87, "América Latina y el Caribe (promedio)": 89, "Colombia": 92, "Chile": 95, "Europa": 97, "Brasil": 97, "Costa Rica": 97, "Argentina": 100}, "2024": {"Guatemala": 51, "Honduras": 57, "Mundo": 75, "México": 88, "América Latina y el Caribe (promedio)": 90, "Colombia": 93, "Chile": 96, "Europa": 97, "Costa Rica": 97, "Brasil": 98, "Argentina": 100}};
+const SHORT={"América Latina y el Caribe (promedio)":"Latinoamérica y Caribe (prom.)"};
+const AGG=new Set(["Mundo","Europa","América Latina y el Caribe (promedio)"]);
+const years=Object.keys(DATA).map(Number).sort((a,b)=>a-b);
+const names=Object.keys(DATA[years[0]]);
+const chart=document.getElementById('chart'),yearEl=document.getElementById('year'),slider=document.getElementById('slider'),playBtn=document.getElementById('play');
+let RH=44;
+const rows={};
+names.forEach(n=>{
+  const r=document.createElement('div');r.className='row'+(n==='México'?' mx':(AGG.has(n)?' ag':''));
+  r.innerHTML='<div class="lab"></div><div class="track"><div class="bar"><span class="val"></span></div></div>';
+  r.querySelector('.lab').textContent=SHORT[n]||n;chart.appendChild(r);rows[n]=r;
+});
+function layout(){
+  const w=chart.clientWidth;
+  const lw=w<480?Math.round(w*0.34):Math.round(w*0.30);
+  RH=w<480?42:46;
+  chart.style.setProperty('--rh',RH+'px');chart.style.setProperty('--lw',lw+'px');
+  chart.style.height=(RH*names.length)+'px';
+  document.querySelector('.ticks')&&0;
+}
+function draw(y){
+  const d=DATA[y];
+  const order=names.slice().sort((a,b)=>d[b]-d[a]||names.indexOf(a)-names.indexOf(b));
+  const track=chart.querySelector('.track').clientWidth;
+  const max=122; // deja espacio para la etiqueta de valor
+  order.forEach((n,i)=>{
+    const r=rows[n];
+    r.style.transform='translateY('+(i*RH)+'px)';
+    const bar=r.querySelector('.bar');
+    bar.style.width=(d[n]/max*100)+'%';
+    r.querySelector('.val').textContent=d[n]+'%';
+  });
+  yearEl.textContent=y;slider.value=y;
+}
+let timer=null,cur=years[0];
+function stop(){clearInterval(timer);timer=null;playBtn.innerHTML=(cur>=years[years.length-1]?'&#8635; Repetir':'&#9654; Reproducir');}
+function play(){
+  if(cur>=years[years.length-1])cur=years[0];
+  draw(cur);playBtn.innerHTML='&#9208; Pausa';
+  clearInterval(timer);
+  timer=setInterval(()=>{
+    if(cur>=years[years.length-1]){stop();return;}
+    cur++;draw(cur);
+    if(cur>=years[years.length-1])stop();
+  },650);
+}
+playBtn.addEventListener('click',()=>{timer?stop():play();});
+slider.addEventListener('input',()=>{cur=+slider.value;clearInterval(timer);timer=null;draw(cur);playBtn.innerHTML=(cur>=years[years.length-1]?'&#8635; Repetir':'&#9654; Reproducir');});
+window.addEventListener('resize',()=>{layout();draw(cur);});
+layout();draw(cur);
+setTimeout(play,500);
+</script>
+</body>
+</html>
